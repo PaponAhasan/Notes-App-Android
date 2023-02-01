@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Your Notes</string>
+
+    <string name="note_text">My family is big family. I have two brother.and one sisterMy family is big family. I have two brother.and one sisterMy family is big family. I have two brother.and one sister</string>
+    <string name="title">Title</string>
+    <string name="description">Enter note here..</string>
+    <string name="save">Save</string>
+</resources>
