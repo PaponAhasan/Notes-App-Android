@@ -8,39 +8,54 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import com.example.yournotes.databinding.ActivityNoteCreateBinding
+import com.example.yournotes.databinding.ActivityUpdateNoteBinding
 
-class CreateNoteActivity : AppCompatActivity() {
+class UpdateNoteActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityNoteCreateBinding
+   private lateinit var receivedNote : Note
+
+    private lateinit var binding: ActivityUpdateNoteBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityNoteCreateBinding.inflate(layoutInflater)
+        binding = ActivityUpdateNoteBinding.inflate(layoutInflater)
         val view = binding.root
+
+        receivedNote = intent.getSerializableExtra("update_note") as Note
+
+        binding.updateHeaderET.setText(receivedNote.headerText)
+        binding.updateBodyET.setText(receivedNote.bodyText)
+
         setContentView(view)
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.custom_toolbar, menu)
         return true
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
             R.id.saveIv -> {
 
-                val headerText = binding.headerET.text
-                val bodyText = binding.bodyET.text
+                val headerText = binding.updateHeaderET.text
+                val bodyText = binding.updateBodyET.text
 
-                val insertNote = Note(
+                val updatedNote = Note(
                     headerText.toString(),
                     bodyText.toString()
                 )
+
+                updatedNote.id = receivedNote.id
+
+                //Log.e("UpdateNoteActivity", headerText.toString())
 
                 if (headerText.isEmpty() or bodyText.isEmpty()) {
                     Toast.makeText(this, "Text required..", Toast.LENGTH_LONG).show()
                 }
                 else {
                     val intent = Intent()
-                    intent.putExtra("notes", insertNote)
+                    intent.putExtra("update_notes", updatedNote)
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }

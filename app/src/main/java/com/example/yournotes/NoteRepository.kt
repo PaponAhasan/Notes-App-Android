@@ -6,17 +6,23 @@ import kotlinx.coroutines.withContext
 
 class NoteRepository(private val noteDao: NoteDao) {
 
-    suspend fun insert(note: Note){
+    suspend fun insert(note: Note) {
         withContext(Dispatchers.IO) {
             noteDao.insert(note)
         }
     }
 
-    suspend fun delete(note: Note){
+    suspend fun update(note: Note) {
+        withContext(Dispatchers.IO) {
+            noteDao.update(note)
+        }
+    }
+
+    suspend fun delete(note: Note) {
         withContext(Dispatchers.IO) {
             noteDao.delete(note)
         }
     }
 
-    val getAllNotes : LiveData<List<Note>> = noteDao.getAllNotes()
+    val getAllNotes: LiveData<List<Note>> = noteDao.getAllNotes()
 }

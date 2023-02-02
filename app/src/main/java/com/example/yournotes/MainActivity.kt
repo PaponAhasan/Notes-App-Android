@@ -2,79 +2,90 @@ package com.example.yournotes
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.yournotes.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), INoteRvAdapter {
 
     private lateinit var noteViewModel: NoteViewModel
-
+    private lateinit var adapter: NoteAdapter
+    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
     }
-
     override fun onStart() {
         super.onStart()
 
-        val notesRecyclerView = findViewById<RecyclerView>(R.id.notesRecyclerView)
+        adapter = NoteAdapter(this, this)
+        binding.notesRecyclerView.adapter = adapter
 
-        val adapter = NoteAdapter(this, this)
-        notesRecyclerView.adapter = adapter
+        binding.notesRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        notesRecyclerView.layoutManager = LinearLayoutManager(this)
-
-        //val noteViewModel = ViewModelProvider(this)[NodeViewModel::class.java]
         noteViewModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[NoteViewModel::class.java]
+
         noteViewModel.getAllNotes().observe(this) { notes ->
             notes?.let {
                 adapter.updateNoteList(notes)
             }
         }
 
-        val fabAddNote = findViewById<FloatingActionButton>(R.id.fabAddNote)
-        fabAddNote.setOnClickListener {
+        binding.fabAddNote.setOnClickListener {
             val intent = Intent(this, CreateNoteActivity::class.java)
-            getResult.launch(intent)
+            //getResult.launch(intent)
+            //startActivity(intent)
+            startActivityForResult(intent, 101)
         }
     }
-
     override fun deleteNoteClicked(note: Note) {
         noteViewModel.deleteNote(note)
         Toast.makeText(this, "${note.headerText} Deleted", Toast.LENGTH_LONG).show()
     }
-
-    override fun addNoteClicked(note: Note) {
-        TODO("Not yet implemented")
+    override fun updateNoteClicked(note: Note) {
+        val intent = Intent(this, UpdateNoteActivity::class.java)
+        intent.putExtra("update_note", note)
+        startActivityForResult(intent, 102)
+        //getUpdateResult.launch(intent)
     }
 
-    private var getResult = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-
-        if (result.resultCode == Activity.RESULT_OK) {
-            val headerData = result.data?.getStringExtra("headerResult")
-            val bodyData = result.data?.getStringExtra("bodyResult")
-            Toast.makeText(this, "$headerData Inserted", Toast.LENGTH_LONG).show()
-//          headerData?.let { Note(it) }?.let { noteViewModel.addNote(it) }
-
-            if (bodyData != null) {
-                if (headerData != null) {
-                    noteViewModel.addNote(Note(headerData, bodyData))
-                    Toast.makeText(this, "$headerData Inserted", Toast.LENGTH_LONG).show()
-                }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == 101){
+            if (resultCode == Activity.RESULT_OK) {
+                val notesResult = data?.getSerializableExtra("notes") as Note
+                noteViewModel.insert(notesResult)
+                Toast.makeText(this, "${notesResult.headerText} Inserted", Toast.LENGTH_LONG).show()
+            }
+        }
+        else if(requestCode == 102){
+            if (resultCode == Activity.RESULT_OK) {
+                val notesUpdateResult = data?.getSerializableExtra("update_notes") as Note
+                noteViewModel.update(notesUpdateResult)
+                Toast.makeText(this, "${notesUpdateResult.headerText} Updated", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-
+//    private var getResult = registerForActivityResult(
+//        ActivityResultContracts.StartActivityForResult()
+//    ) { result ->
+//
+//        if (result.resultCode == Activity.RESULT_OK) {
+//            val notesUpdateResult = result.data?.getParcelableExtra<Note>("update_notes")
+//            Toast.makeText(this, "Yea..$notesUpdateResult", Toast.LENGTH_LONG).show()
+//            if (notesUpdateResult != null) {
+//                noteViewModel.update(notesUpdateResult)
+//                Toast.makeText(this, "${notesUpdateResult.headerText} Updated", Toast.LENGTH_LONG).show()
+//            }
+//        }
+//    }
 }

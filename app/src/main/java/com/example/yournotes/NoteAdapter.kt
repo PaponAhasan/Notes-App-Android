@@ -24,6 +24,9 @@ class NoteAdapter(private val context: Context, private val listener:INoteRvAdap
             deleteImage.setOnClickListener {
                 listener.deleteNoteClicked(currentNote)
             }
+            itemView.setOnClickListener {
+                listener.updateNoteClicked(currentNote)
+            }
         }
     }
 
@@ -50,5 +53,5 @@ class NoteAdapter(private val context: Context, private val listener:INoteRvAdap
 
 interface INoteRvAdapter{
     fun deleteNoteClicked(note: Note)
-    fun addNoteClicked(note: Note)
+    fun updateNoteClicked(note: Note)
 }
